@@ -1,0 +1,12 @@
+#!/bin/bash
+
+cd `dirname $0`
+SCRIPTDIR=`pwd`
+cd -
+
+export DISPLAY=:0
+
+CP="$SCRIPTDIR/config:$SCRIPTDIR/lib/*"
+
+java -classpath $CP com.sandy.syssim.SysSim
+
