@@ -16,8 +16,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import java.util.concurrent.TimeUnit;
-
 @Slf4j
 @SpringBootApplication
 public class SysSim
@@ -90,13 +88,6 @@ public class SysSim
 
         Simulation sim = new Projectile2DSim() ;
         InitParams initParams = sim.getInitParams() ;
-        for( int i=0; i<100; i++ ) {
-            sim.execute( i ) ;
-            try {
-                TimeUnit.MICROSECONDS.sleep( 500 ) ;
-            }
-            catch( InterruptedException ignore ) {}
-        }
     }
 
     // --------------------- Main method ---------------------------------------
