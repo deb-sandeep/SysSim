@@ -2,9 +2,12 @@ package com.sandy.syssim;
 
 import com.sandy.syssim.core.SysSimConfig;
 import com.sandy.syssim.core.bus.EventBus;
+import com.sandy.syssim.core.simbase.InitParams;
+import com.sandy.syssim.core.simbase.Simulation;
 import com.sandy.syssim.core.ui.SysSimFrame;
 import com.sandy.syssim.core.ui.uiutil.DefaultUITheme;
 import com.sandy.syssim.core.ui.uiutil.UITheme;
+import com.sandy.syssim.sims.projectile2d.Projectile2DSim;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.SpringApplication;
@@ -13,7 +16,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import javax.swing.*;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @SpringBootApplication
@@ -58,10 +61,10 @@ public class SysSim
         log.debug( "- Initializing Theme" ) ;
         this.uiTheme = new DefaultUITheme() ;
 
-        log.debug( "- Initializing SysSimFrame" ) ;
-        SwingUtilities.invokeLater( ()->{
-            this.frame = new SysSimFrame( uiTheme, getConfig() ) ;
-        } ) ;
+//        log.debug( "- Initializing SysSimFrame" ) ;
+//        SwingUtilities.invokeLater( ()->{
+//            this.frame = new SysSimFrame( uiTheme, getConfig() ) ;
+//        } ) ;
         log.debug( "<< ## SysSim initialization complete" ) ;
     }
 
@@ -83,6 +86,19 @@ public class SysSim
         return cfg ;
     }
 
+    public void runSim() {
+
+        Simulation sim = new Projectile2DSim() ;
+        InitParams initParams = sim.getInitParams() ;
+        for( int i=0; i<100; i++ ) {
+            sim.execute( i ) ;
+            try {
+                TimeUnit.MICROSECONDS.sleep( 500 ) ;
+            }
+            catch( InterruptedException ignore ) {}
+        }
+    }
+
     // --------------------- Main method ---------------------------------------
     public static void main( String[] args ) {
 
@@ -94,6 +110,8 @@ public class SysSim
             SpringApplication.run( SysSim.class, args ) ;
             SysSim app = SysSim.getAppCtx().getBean( SysSim.class ) ;
             app.initialize() ;
+
+            app.runSim() ;
         }
         catch( Exception e ) {
             log.error( "Exception while initializing SysSim.", e ) ;
