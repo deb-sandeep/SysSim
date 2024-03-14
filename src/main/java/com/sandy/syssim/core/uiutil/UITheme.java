@@ -1,4 +1,4 @@
-package com.sandy.syssim.core.ui.uiutil;
+package com.sandy.syssim.core.uiutil;
 
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;

@@ -1,4 +1,4 @@
-package com.sandy.syssim.core.ui.uiutil;
+package com.sandy.syssim.core.uiutil;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

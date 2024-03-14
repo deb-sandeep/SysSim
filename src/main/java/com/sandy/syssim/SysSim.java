@@ -1,13 +1,10 @@
 package com.sandy.syssim;
 
-import com.sandy.syssim.core.SysSimConfig;
+import com.sandy.syssim.core.SSConfig;
 import com.sandy.syssim.core.bus.EventBus;
-import com.sandy.syssim.core.simbase.InitParams;
-import com.sandy.syssim.core.simbase.Simulation;
-import com.sandy.syssim.core.ui.SysSimFrame;
-import com.sandy.syssim.core.ui.uiutil.DefaultUITheme;
-import com.sandy.syssim.core.ui.uiutil.UITheme;
-import com.sandy.syssim.sims.projectile2d.Projectile2DSim;
+import com.sandy.syssim.ui.mainframe.SSFrame;
+import com.sandy.syssim.core.uiutil.DefaultUITheme;
+import com.sandy.syssim.core.uiutil.UITheme;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.SpringApplication;
@@ -15,6 +12,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+
+import javax.swing.*;
 
 @Slf4j
 @SpringBootApplication
@@ -38,9 +37,9 @@ public class SysSim
 
     // ---------------- Instance methods start ---------------------------------
 
-    private UITheme uiTheme = null ;
-    private SysSimFrame frame = null ;
-    private SysSimConfig cfg = null ;
+    private UITheme      uiTheme = null ;
+    private SSFrame  frame = null ;
+    private SSConfig cfg   = null ;
 
     public SysSim() {
         APP = this;
@@ -54,40 +53,35 @@ public class SysSim
 
     public void initialize() throws Exception {
 
-        log.debug( "## Initializing SysSim app. >" ) ;
+        log.debug( "Initializing SysSim app." ) ;
 
-        log.debug( "- Initializing Theme" ) ;
+        log.debug( "Initializing Theme" ) ;
         this.uiTheme = new DefaultUITheme() ;
 
-//        log.debug( "- Initializing SysSimFrame" ) ;
-//        SwingUtilities.invokeLater( ()->{
-//            this.frame = new SysSimFrame( uiTheme, getConfig() ) ;
-//        } ) ;
-        log.debug( "<< ## SysSim initialization complete" ) ;
+        log.debug( "- Initializing SysSimFrame" ) ;
+        SwingUtilities.invokeLater( ()->{
+            this.frame = new SSFrame( uiTheme, getConfig() ) ;
+        } ) ;
+        
+        log.debug( "SysSim initialization complete" ) ;
     }
 
     public UITheme getTheme() { return this.uiTheme ; }
 
-    public SysSimFrame getFrame() { return this.frame; }
+    public SSFrame getFrame() { return this.frame; }
 
     public ApplicationContext getCtx() { return SysSim.APP_CTX ; } ;
 
-    public SysSimConfig getConfig() {
+    public SSConfig getConfig() {
         if( cfg == null ) {
             if( APP_CTX != null ) {
-                cfg = (SysSimConfig)APP_CTX.getBean("config");
+                cfg = ( SSConfig )APP_CTX.getBean("config");
             }
             else {
-                cfg = new SysSimConfig() ;
+                cfg = new SSConfig() ;
             }
         }
         return cfg ;
-    }
-
-    public void runSim() {
-
-        Simulation sim = new Projectile2DSim() ;
-        InitParams initParams = sim.getInitParams() ;
     }
 
     // --------------------- Main method ---------------------------------------
@@ -101,8 +95,6 @@ public class SysSim
             SpringApplication.run( SysSim.class, args ) ;
             SysSim app = SysSim.getAppCtx().getBean( SysSim.class ) ;
             app.initialize() ;
-
-            app.runSim() ;
         }
         catch( Exception e ) {
             log.error( "Exception while initializing SysSim.", e ) ;

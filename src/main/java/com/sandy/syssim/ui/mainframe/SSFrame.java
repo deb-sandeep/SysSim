@@ -1,18 +1,18 @@
-package com.sandy.syssim.core.ui;
+package com.sandy.syssim.ui.mainframe;
 
-import com.sandy.syssim.core.SysSimConfig;
-import com.sandy.syssim.core.ui.uiutil.UITheme;
+import com.sandy.syssim.core.SSConfig;
+import com.sandy.syssim.core.uiutil.UITheme;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import java.awt.*;
 
 @Slf4j
-public class SysSimFrame extends JFrame {
+public class SSFrame extends JFrame {
     
     private final Container contentPane ;
 
-    public SysSimFrame( UITheme theme, SysSimConfig config ) {
+    public SSFrame( UITheme theme, SSConfig config ) {
         super() ;
 
         this.contentPane = super.getContentPane() ;

@@ -11,8 +11,6 @@ import java.io.File;
 @PropertySource( "classpath:syssim.properties" )
 @ConfigurationProperties( "syssim" )
 @Data
-public class SysSimConfig {
-
-    private String envType = "dev" ;
+public class SSConfig {
     private File workspacePath = null ;
 }
