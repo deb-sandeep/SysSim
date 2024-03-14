@@ -1,4 +1,4 @@
-package com.sandy.syssim.test.java3d;
+package com.sandy.syssim.test.java3d.poc;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jogamp.java3d.*;
@@ -13,17 +13,14 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static com.sandy.syssim.test.java3d.TMatrix.*;
+
 @Slf4j
-public class Java3DTimerTrigger extends JFrame {
-    
-    public static void main( String[] args ) {
-        System.setProperty( "sun.awt.noerasebackground", "true" );
-        EventQueue.invokeLater( () -> new Java3DTimerTrigger().setVisible( true ) );
-    }
+public class Java3DViewPlatform extends JFrame {
     
     private RotateBehavior rotateBehavior;
     
-    public Java3DTimerTrigger() {
+    public Java3DViewPlatform() {
         Canvas3D       canvas3D   = createCanvas3D();
         BranchGroup    sceneGraph = createSceneGraph();
         SimpleUniverse universe   = createUniverse( canvas3D );
@@ -40,7 +37,11 @@ public class Java3DTimerTrigger extends JFrame {
             public void run() {
                 iterCount++ ;
                 if( iterCount % 180 == 0 ) {
-                    curAxis = (char)('X' + random.nextInt( 3 )) ;
+                    char newAxis = curAxis ;
+                    while( newAxis == curAxis ) {
+                        newAxis = (char)('X' + random.nextInt( 3 )) ;
+                    }
+                    curAxis = newAxis ;
                 }
                 rotateBehavior.rotate( curAxis );
             }
@@ -79,18 +80,12 @@ public class Java3DTimerTrigger extends JFrame {
     
     public BranchGroup createSceneGraph() {
         
-        // Create the root of the branch graph
         BranchGroup sceneGraph = new BranchGroup();
         
-        // Create the transform group node and initialize it to the
-        // identity.  Enable the TRANSFORM_WRITE capability so that
-        // our behavior code can modify it at runtime.  Add it to the
-        // root of the subgraph.
         TransformGroup transformGroup = new TransformGroup();
         transformGroup.setCapability( TransformGroup.ALLOW_TRANSFORM_WRITE );
         transformGroup.addChild( new ColorCube( 0.4 ) );
         
-        // create the RotateBehavior
         BoundingSphere bounds = new BoundingSphere( new Point3d( 0.0, 0.0, 0.0 ), 100.0 );
         rotateBehavior = new RotateBehavior( transformGroup );
         rotateBehavior.setSchedulingBounds( bounds );
@@ -141,26 +136,10 @@ public class Java3DTimerTrigger extends JFrame {
                 }
             }
             
-            transformGroup.setTransform( getRotationTransform( angleX, angleY, angleZ ) );
+            transformGroup.setTransform(
+                new Transform3D( zRot( angleZ, yRot( angleY, xRot( angleX ) ) ) )
+            ) ;
             wakeupOn( wakeupCondition );
-        }
-        
-        private static Transform3D getRotationTransform( float angleX, float angleY, float angleZ ) {
-            
-            Transform3D totalTrans = new Transform3D();
-            
-            Transform3D transRotX = new Transform3D();
-            Transform3D transRotY = new Transform3D();
-            Transform3D transRotZ = new Transform3D();
-            
-            transRotX.rotX( angleX );
-            transRotY.rotY( angleY );
-            transRotZ.rotZ( angleZ );
-            
-            totalTrans.mul( transRotX, transRotY );
-            totalTrans.mul( transRotZ );
-            
-            return totalTrans;
         }
         
         void rotate( char axis ) {

@@ -1,4 +1,4 @@
-package com.sandy.syssim.test.java3d;
+package com.sandy.syssim.test.java3d.poc;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jogamp.java3d.*;
@@ -8,20 +8,17 @@ import org.jogamp.vecmath.Point3d;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.util.Iterator;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 @Slf4j
-public class Java3DSwingInteraction extends JFrame {
-    
-    public static void main( String[] args ) {
-        System.setProperty( "sun.awt.noerasebackground", "true" );
-        java.awt.EventQueue.invokeLater( () -> new Java3DSwingInteraction().setVisible( true ) );
-    }
+public class Java3DTimerTrigger extends JFrame {
     
     private RotateBehavior rotateBehavior;
     
-    public Java3DSwingInteraction() {
+    public Java3DTimerTrigger() {
         Canvas3D       canvas3D   = createCanvas3D();
         BranchGroup    sceneGraph = createSceneGraph();
         SimpleUniverse universe   = createUniverse( canvas3D );
@@ -29,42 +26,38 @@ public class Java3DSwingInteraction extends JFrame {
         universe.addBranchGraph( sceneGraph );
         
         initComponents( canvas3D );
+        Timer timer = new Timer( true ) ;
+        timer.scheduleAtFixedRate( new TimerTask() {
+            private final Random random = new Random() ;
+            private int iterCount = 0 ;
+            private char curAxis = 'X' ;
+            
+            public void run() {
+                iterCount++ ;
+                if( iterCount % 180 == 0 ) {
+                    char newAxis = curAxis ;
+                    while( newAxis == curAxis ) {
+                        newAxis = (char)('X' + random.nextInt( 3 )) ;
+                    }
+                    curAxis = newAxis ;
+                }
+                rotateBehavior.rotate( curAxis );
+            }
+        }, 100, 20 ) ;
     }
     
     private void initComponents( Canvas3D canvas3D ) {
         
-        JPanel  btnPanel      = new JPanel();
-        JPanel  canvasPanel   = new JPanel();
-        
-        JButton rotateYButton = new JButton();
-        JButton rotateXButton = new JButton();
-        JButton rotateZButton = new JButton();
+        JPanel canvasPanel = new JPanel();
         
         setDefaultCloseOperation( WindowConstants.EXIT_ON_CLOSE );
         setTitle( "Swing Interaction Test" );
         
-        btnPanel.setLayout( new FlowLayout( FlowLayout.CENTER ) );
+        canvasPanel.setLayout( new BorderLayout() );
+        canvasPanel.setPreferredSize( new Dimension( 500, 500 ) );
+        canvasPanel.add( canvas3D, BorderLayout.CENTER );
         
-        rotateXButton.setText( "Rotate X" );
-        rotateYButton.setText( "Rotate Y" );
-        rotateZButton.setText( "Rotate Z" );
-        
-        rotateXButton.addActionListener( this::rotateButtonActionPerformed );
-        rotateYButton.addActionListener( this::rotateButtonActionPerformed );
-        rotateZButton.addActionListener( this::rotateButtonActionPerformed );
-        
-        btnPanel.add( rotateXButton ) ;
-        btnPanel.add( rotateYButton ) ;
-        btnPanel.add( rotateZButton ) ;
-        
-        getContentPane().add( btnPanel, java.awt.BorderLayout.NORTH );
-        
-        canvasPanel.setLayout( new java.awt.BorderLayout() );
-        canvasPanel.setPreferredSize( new java.awt.Dimension( 500, 500 ) );
-        canvasPanel.add( canvas3D, java.awt.BorderLayout.CENTER );
-        
-        getContentPane().add( canvasPanel, java.awt.BorderLayout.CENTER );
-        
+        getContentPane().add( canvasPanel, BorderLayout.CENTER );
         pack();
     }
     
@@ -107,23 +100,14 @@ public class Java3DSwingInteraction extends JFrame {
         return sceneGraph;
     }
     
-    private void rotateButtonActionPerformed( ActionEvent evt ) {
-        JButton btn      = ( JButton )evt.getSource();
-        String  btnLabel = btn.getText();
-        
-        char axis = btnLabel.charAt( btnLabel.length() - 1 ) ;
-        
-        rotateBehavior.rotate( axis );
-    }
-    
     static class RotateBehavior extends Behavior {
         
         private final int ROTATE_X = 1;
         private final int ROTATE_Y = 2;
         private final int ROTATE_Z = 3;
         
-        private final TransformGroup  transformGroup;
-        private       WakeupOr        wakeupCondition ;
+        private final TransformGroup transformGroup;
+        private       WakeupOr       wakeupCondition;
         
         private float angleX = 0.0f;
         private float angleY = 0.0f;
@@ -137,10 +121,10 @@ public class Java3DSwingInteraction extends JFrame {
         public void initialize() {
             
             wakeupCondition = new WakeupOr( new WakeupCriterion[]{
-                new WakeupOnBehaviorPost( this, ROTATE_X ),
-                new WakeupOnBehaviorPost( this, ROTATE_Y ),
-                new WakeupOnBehaviorPost( this, ROTATE_Z ),
-            } ) ;
+                    new WakeupOnBehaviorPost( this, ROTATE_X ),
+                    new WakeupOnBehaviorPost( this, ROTATE_Y ),
+                    new WakeupOnBehaviorPost( this, ROTATE_Z ),
+            } );
             wakeupOn( wakeupCondition );
         }
         
@@ -150,9 +134,9 @@ public class Java3DSwingInteraction extends JFrame {
             while( criteria.hasNext() ) {
                 WakeupOnBehaviorPost criterion = ( WakeupOnBehaviorPost )criteria.next();
                 switch( criterion.getPostId() ) {
-                    case ROTATE_X -> angleX += Math.toRadians( 10.0 );
-                    case ROTATE_Y -> angleY += Math.toRadians( 10.0 );
-                    case ROTATE_Z -> angleZ += Math.toRadians( 10.0 );
+                    case ROTATE_X -> angleX += Math.toRadians( 2.3 );
+                    case ROTATE_Y -> angleY += Math.toRadians( 2.1 );
+                    case ROTATE_Z -> angleZ += Math.toRadians( 2.5 );
                 }
             }
             
@@ -164,18 +148,18 @@ public class Java3DSwingInteraction extends JFrame {
             
             Transform3D totalTrans = new Transform3D();
             
-            Transform3D transRotX = new Transform3D() ;
-            Transform3D transRotY = new Transform3D() ;
-            Transform3D transRotZ = new Transform3D() ;
+            Transform3D transRotX = new Transform3D();
+            Transform3D transRotY = new Transform3D();
+            Transform3D transRotZ = new Transform3D();
             
             transRotX.rotX( angleX );
             transRotY.rotY( angleY );
             transRotZ.rotZ( angleZ );
             
-            totalTrans.mul( transRotX, transRotY ); ;
-            totalTrans.mul( transRotZ ) ;
+            totalTrans.mul( transRotX, transRotY );
+            totalTrans.mul( transRotZ );
             
-            return totalTrans ;
+            return totalTrans;
         }
         
         void rotate( char axis ) {
