@@ -1,10 +1,13 @@
 package com.sandy.syssim.sim.test;
 
-import com.sandy.syssim.core.project.annots.Simulation;
+import com.sandy.syssim.core.project.Simulation;
+import com.sandy.syssim.core.project.annots.Sim;
+import org.springframework.stereotype.Component;
 
-@Simulation(
+@Sim(
     name = "TestSym",
     description = "TestSym description"
 )
-public class TestSym {
+@Component
+public class TestSym implements Simulation {
 }
