@@ -1,8 +1,9 @@
 package com.sandy.syssim.core.ui.mainframe;
 
 import com.sandy.syssim.core.SSConfig;
+import com.sandy.syssim.core.project.SimulationMetadata;
 import com.sandy.syssim.core.project.dialog.openproject.OpenProjectDialog;
-import com.sandy.syssim.core.project.util.ProjectUtil;
+import com.sandy.syssim.core.project.dialog.openproject.OpenProjectDialogUI;
 import com.sandy.syssim.core.util.UITheme;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -22,7 +23,7 @@ public class SSFrame extends JFrame {
     private final UITheme theme ;
     private final SSMenuBar menuBar ;
     
-    private final OpenProjectDialog openProjectDialog ;
+    private final OpenProjectDialogUI openProjectDialogUI;
 
     public SSFrame( UITheme theme, SSConfig config ) {
         super() ;
@@ -30,7 +31,7 @@ public class SSFrame extends JFrame {
         this.theme = theme ;
         
         this.menuBar = new SSMenuBar( this ) ;
-        this.openProjectDialog = new OpenProjectDialog( this ) ;
+        this.openProjectDialogUI = new OpenProjectDialog( this ) ;
 
         this.contentPane = super.getContentPane() ;
         
@@ -56,8 +57,10 @@ public class SSFrame extends JFrame {
     }
     
     public void openProject() {
-        ProjectUtil.scanSimProjects() ;
-        openProjectDialog.setVisible( true ) ;
+        this.openProjectDialogUI.setVisible( true ) ;
+    }
+    
+    public void openProject( SimulationMetadata simMeta ) {
     }
     
     public void closeProject() {

@@ -9,10 +9,16 @@ public class SimulationMetadata {
     @Getter private boolean containerManaged ;
     @Getter private Class<? extends Simulation> simulationClass ;
     
-    public SimulationMetadata( String name, String description, boolean containerManaged, Class<? extends Simulation> simulationClass ) {
+    public SimulationMetadata( String name, String description,
+                               boolean containerManaged,
+                               Class<? extends Simulation> simulationClass ) {
         this.name = name ;
         this.description = description ;
         this.containerManaged = containerManaged ;
         this.simulationClass = simulationClass ;
+    }
+    
+    public String toString() {
+        return this.name ;
     }
 }

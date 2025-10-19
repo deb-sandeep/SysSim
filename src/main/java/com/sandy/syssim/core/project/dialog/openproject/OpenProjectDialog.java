@@ -1,121 +1,114 @@
 package com.sandy.syssim.core.project.dialog.openproject;
 
+import com.sandy.syssim.SysSim;
+import com.sandy.syssim.core.project.Simulation;
+import com.sandy.syssim.core.project.SimulationMetadata;
+import com.sandy.syssim.core.project.annots.Sim;
+import com.sandy.syssim.core.ui.mainframe.SSFrame;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.core.type.filter.AssignableTypeFilter;
+
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
-import java.awt.event.ActionEvent;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import java.util.ArrayList;
+import java.util.List;
 
-public class OpenProjectDialog extends JDialog {
-
-    public OpenProjectDialog(Window owner) {
-        super(owner);
-        initComponents();
+@Slf4j
+public class OpenProjectDialog extends OpenProjectDialogUI {
+    
+    private final SSFrame mainFrame ;
+    private final List<SimulationMetadata> sims ;
+    private final DefaultListModel<SimulationMetadata> simListModel = new DefaultListModel<>() ;
+    
+    public OpenProjectDialog( SSFrame mainFrame ) {
+        super( mainFrame ) ;
+        this.mainFrame = mainFrame ;
+        this.sims = scanSimProjects() ;
+        setUpUI() ;
     }
-
-    private void ok(ActionEvent e) {
-        // TODO add your code here
-    }
-
-    private void cancel(ActionEvent e) {
-        // TODO add your code here
-        setVisible(false);
-        dispose();
-    }
-
-    private void initComponents() {
-        // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
-        dialogPane = new JPanel();
-        contentPanel = new JPanel();
-        searchTextField = new JTextField();
-        var listSP = new JScrollPane();
-        projectList = new JList();
-        var textAreaSP = new JScrollPane();
-        descrTextArea = new JTextArea();
-        var buttonBar = new JPanel();
-        cancelButton = new JButton();
-        okButton = new JButton();
-
-        //======== this ========
-        setTitle("Open Project");
-        setModal(true);
-        var contentPane = getContentPane();
-        contentPane.setLayout(new BorderLayout());
-
-        //======== dialogPane ========
-        {
-            dialogPane.setBorder(new EmptyBorder(12, 12, 12, 12));
-            dialogPane.setLayout(new BorderLayout());
-
-            //======== contentPanel ========
-            {
-
-                //======== listSP ========
-                {
-                    listSP.setViewportView(projectList);
-                }
-
-                //======== textAreaSP ========
-                {
-                    textAreaSP.setViewportView(descrTextArea);
-                }
-
-                GroupLayout contentPanelLayout = new GroupLayout(contentPanel);
-                contentPanel.setLayout(contentPanelLayout);
-                contentPanelLayout.setHorizontalGroup(
-                    contentPanelLayout.createParallelGroup()
-                        .addComponent(searchTextField, GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE)
-                        .addComponent(listSP, GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE)
-                        .addComponent(textAreaSP, GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE)
-                );
-                contentPanelLayout.setVerticalGroup(
-                    contentPanelLayout.createParallelGroup()
-                        .addGroup(contentPanelLayout.createSequentialGroup()
-                            .addComponent(searchTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(listSP, GroupLayout.PREFERRED_SIZE, 129, GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(textAreaSP, GroupLayout.DEFAULT_SIZE, 103, Short.MAX_VALUE)
-                            .addContainerGap())
-                );
+    
+    private List<SimulationMetadata> scanSimProjects() {
+        
+        ClassPathScanningCandidateComponentProvider provider =
+                new ClassPathScanningCandidateComponentProvider( false ) ;
+        
+        provider.addIncludeFilter( new AnnotationTypeFilter( Sim.class ) ) ;
+        provider.addIncludeFilter( new AssignableTypeFilter( Simulation.class ) ) ;
+        
+        List<SimulationMetadata> sims = new ArrayList<>();
+        for( var beanDef : provider.findCandidateComponents( "com.sandy.syssim.sim" ) ) {
+            try {
+                Class<? extends Simulation> clz = ( Class<? extends Simulation> )Class.forName( beanDef.getBeanClassName() );
+                Sim annotation = clz.getAnnotation( Sim.class ) ;
+                
+                assert annotation != null;
+                SimulationMetadata meta = new SimulationMetadata(
+                        annotation.name(),
+                        annotation.description(),
+                        !SysSim.getAppCtx().getBeansOfType( clz ).isEmpty() ,
+                        clz ) ;
+                
+                sims.add( meta ) ;
+                log.debug( "Found simulation class: {}", clz.getName() );
+                log.debug( "   Simulation name : {}", meta.getName() );
+                log.debug( "   Simulation desc : {}", meta.getDescription() );
+                log.debug( "   Is container managed : {}", meta.isContainerManaged() );
             }
-            dialogPane.add(contentPanel, BorderLayout.CENTER);
-
-            //======== buttonBar ========
-            {
-                buttonBar.setBorder(new EmptyBorder(12, 0, 0, 0));
-                buttonBar.setLayout(new GridBagLayout());
-                ((GridBagLayout)buttonBar.getLayout()).columnWidths = new int[] {0, 85, 80};
-                ((GridBagLayout)buttonBar.getLayout()).columnWeights = new double[] {1.0, 0.0, 0.0};
-
-                //---- cancelButton ----
-                cancelButton.setText("Cancel");
-                cancelButton.addActionListener(e -> cancel(e));
-                buttonBar.add(cancelButton, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                    new Insets(0, 0, 0, 5), 0, 0));
-
-                //---- okButton ----
-                okButton.setText("OK");
-                okButton.addActionListener(e -> ok(e));
-                buttonBar.add(okButton, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                    new Insets(0, 0, 0, 0), 0, 0));
+            catch( ClassNotFoundException e ) {
+                throw new RuntimeException( e );
             }
-            dialogPane.add(buttonBar, BorderLayout.SOUTH);
         }
-        contentPane.add(dialogPane, BorderLayout.CENTER);
-        pack();
-        setLocationRelativeTo(getOwner());
-        // JFormDesigner - End of component initialization  //GEN-END:initComponents  @formatter:on
+        return sims ;
     }
+    
+    private void setUpUI() {
+        
+        setUpSimulationList() ;
+        setUpSearchField() ;
 
-    // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables  @formatter:off
-    private JPanel dialogPane;
-    private JPanel contentPanel;
-    private JTextField searchTextField;
-    private JList projectList;
-    private JTextArea descrTextArea;
-    private JButton cancelButton;
-    private JButton okButton;
-    // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
+        super.cancelButton.addActionListener( (e) -> {
+            setVisible( false ) ;
+        } ) ;
+        super.okButton.addActionListener( (e) -> {
+            setVisible( false ) ;
+            SimulationMetadata selectedSim = super.projectList.getSelectedValue() ;
+            if( selectedSim != null ) {
+                this.mainFrame.openProject( selectedSim ) ;
+            }
+        }) ;
+    }
+    
+    private void setUpSimulationList() {
+        this.simListModel.addAll( this.sims ) ;
+        super.projectList.setModel( this.simListModel ) ;
+        super.projectList.addListSelectionListener( (e) -> {
+            if( !e.getValueIsAdjusting() ) {
+                SimulationMetadata selectedSim = super.projectList.getSelectedValue() ;
+                okButton.setEnabled( selectedSim != null ) ;
+                super.descrTextArea.setText( "" ) ;
+                if( selectedSim != null ) {
+                    super.descrTextArea.setText( selectedSim.getDescription() ) ;
+                }
+            }
+        } ) ;
+        super.projectList.setSelectedIndex( 0 ) ;
+    }
+    
+    private void setUpSearchField() {
+        super.searchTextField.getDocument().addDocumentListener( new DocumentListener() {
+            private void update() {
+                String filter = OpenProjectDialog.super.searchTextField.getText().trim().toLowerCase() ;
+                simListModel.clear();
+                sims.stream()
+                        .filter(item -> item.getName().toLowerCase().contains( filter ) )
+                        .forEach( simListModel::addElement ) ;
+            }
+            @Override public void insertUpdate(DocumentEvent e) { update(); }
+            @Override public void removeUpdate(DocumentEvent e) { update(); }
+            @Override public void changedUpdate(DocumentEvent e) { update(); }
+        } ) ;
+    }
 }
