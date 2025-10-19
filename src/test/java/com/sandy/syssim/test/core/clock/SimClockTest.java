@@ -1,6 +1,6 @@
 package com.sandy.syssim.test.core.clock ;
 
-import com.sandy.syssim.core.clock.SimClock;
+import com.sandy.syssim.core.project.clock.SimClock;
 import com.sandy.syssim.test.core.clock.fixture.MockTickListeners;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;

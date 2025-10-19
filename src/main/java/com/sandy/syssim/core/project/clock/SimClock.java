@@ -1,4 +1,4 @@
-package com.sandy.syssim.core.clock;
+package com.sandy.syssim.core.project.clock;
 
 import lombok.Getter;
 import lombok.Setter;

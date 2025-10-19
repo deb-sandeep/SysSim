@@ -1,9 +1,12 @@
-package com.sandy.syssim.core.uiutil;
+package com.sandy.syssim.core.util;
+
+import org.springframework.stereotype.Component;
 
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 
+@Component
 public class UITheme {
 
     // Screen theme settings

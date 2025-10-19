@@ -2,11 +2,12 @@ package com.sandy.syssim;
 
 import com.sandy.syssim.core.SSConfig;
 import com.sandy.syssim.core.bus.EventBus;
-import com.sandy.syssim.ui.mainframe.SSFrame;
-import com.sandy.syssim.core.uiutil.DefaultUITheme;
-import com.sandy.syssim.core.uiutil.UITheme;
+import com.sandy.syssim.core.ui.mainframe.SSFrame;
+import com.sandy.syssim.core.util.DefaultUITheme;
+import com.sandy.syssim.core.util.UITheme;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
@@ -37,21 +38,22 @@ public class SysSim
 
     // ---------------- Instance methods start ---------------------------------
 
-    private UITheme      uiTheme = null ;
+    @Autowired private UITheme uiTheme ;
+    
     private SSFrame  frame = null ;
-    private SSConfig cfg   = null ;
+    private SSConfig cfg = null ;
 
     public SysSim() {
         APP = this;
     }
 
     @Override
-    public void setApplicationContext( ApplicationContext applicationContext )
+    public void setApplicationContext( ApplicationContext appCtx )
             throws BeansException {
-        APP_CTX = ( ConfigurableApplicationContext )applicationContext;
+        APP_CTX = ( ConfigurableApplicationContext )appCtx;
     }
 
-    public void initialize() throws Exception {
+    public void initialize() {
 
         log.debug( "Initializing SysSim app." ) ;
 
@@ -59,8 +61,8 @@ public class SysSim
         this.uiTheme = new DefaultUITheme() ;
 
         log.debug( "- Initializing SysSimFrame" ) ;
-        SwingUtilities.invokeLater( ()->{
-            this.frame = new SSFrame( uiTheme, getConfig() ) ;
+        SwingUtilities.invokeLater( ()-> {
+            this.frame = APP_CTX.getBean( SSFrame.class ) ;
         } ) ;
         
         log.debug( "SysSim initialization complete" ) ;
